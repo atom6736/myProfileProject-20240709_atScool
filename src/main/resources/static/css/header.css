@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+tr.header_line {
+	background-color: #3D550C;
+	height: 70px;
+}
+
+span.menu {
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 20px;
+}
+
+span.loginid {
+	color: #3D550C;
+	font-family: Arial;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+a.menulink:link {
+	text-decoration:none;
+	color: inherit;
+}
+
+a.menulink:hover {
+	text-decoration:underline;
+	color: #ffffff;
+	font-weight: bold;
+}
