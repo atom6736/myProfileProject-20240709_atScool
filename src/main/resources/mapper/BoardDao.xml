@@ -13,9 +13,27 @@
 	
 	<!-- 게시판 리스트 -->
 	<select id="listDao" resultType="com.chihwancompany.profile.dto.BoardDto">
-		SELECT * FROM pboard ORDER BY bnum DESC
+		SELECT * FROM		
+			(SELECT A.*, CEIL((ROWNUM/#{param1}))pagenum, ROWNUM
+				FROM 
+					(SELECT * FROM pboard ORDER BY bnum DESC)A)
+						WHERE pagenum = #{param2}
 	</select>
 	
+<!-- 게시판 검색 결과 리스트 -->
+	<select id="searchKeyDao" resultType="com.chihwancompany.profile.dto.BoardDto">
+		SELECT * FROM		
+			(SELECT A.*, CEIL((ROWNUM/#{param1}))pagenum, ROWNUM
+				FROM 
+					(SELECT * FROM pboard WHERE btitle LIKE '%' || #{param3} || '%' OR bcontent LIKE '%' || #{param3} || '%' ORDER BY bnum DESC)A)
+						WHERE pagenum = #{param2}
+	</select>
+
+	<!-- 게시판 검색 결과 글 총 개수 -->
+	<select id="searchResultTotalDao" resultType="int">
+	SELECT COUNT(*) FROM pboard WHERE btitle LIKE '%' || #{param1} || '%' OR bcontent LIKE '%' || #{param1} || '%' 	
+	</select>
+
 	<!-- 게시판 글 내용 보기 -->
 	<select id="contentViewDao" resultType="com.chihwancompany.profile.dto.BoardDto">
 		SELECT * FROM pboard WHERE bnum=#{param1}
@@ -30,5 +48,10 @@
 	<delete id="contentDeleteDao">
 		DELETE FROM pboard WHERE bnum=#{param1}
 	</delete>
+	
+	<!--  게시판 총 글수  -->
+	<select id="boardTotalCountDao" resultType="int">
+		SELECT COUNT(*) FROM pboard 
+	</select>
 
 </mapper>    

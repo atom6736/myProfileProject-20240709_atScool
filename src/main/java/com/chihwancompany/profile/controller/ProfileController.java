@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.chihwancompany.profile.dao.BoardDao;
 import com.chihwancompany.profile.dao.MemberDao;
 import com.chihwancompany.profile.dto.BoardDto;
+import com.chihwancompany.profile.dto.Criteria;
 import com.chihwancompany.profile.dto.MemberDto;
+import com.chihwancompany.profile.dto.PageDto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -96,15 +98,62 @@ public class ProfileController {
 	}
 	
 	@GetMapping(value = "/list")
-	public String list(Model model) {
+	public String list(Model model, Criteria criteria, HttpServletRequest request) {
 		
 		BoardDao boardDao = sqlSession.getMapper(BoardDao.class);
 		
-		ArrayList<BoardDto> bDtos = boardDao.listDao();
+		String pageNum = request.getParameter("pageNum"); // 클라이언트가 클릭한 게시판 페이지 번호.
+		
+		if (pageNum !=null) {//게시판메뉴를 클릭해서 게시판 목록이 보일 경우 pageNum값이 없으므로 에러발생			
+			criteria.setPageNum(Integer.parseInt(pageNum));
+		// 사용자가 클릭한 페이지 번호를 criteria 객체 내 변수인 pageNum값으로 셋팅. 초기값은 1인데 사용자가 다른 걸 클릭하면 바뀜.
+		} 
+		
+		int total = boardDao.boardTotalCountDao(); //게시판 내 모든 글의 총 개수
+		
+		PageDto pageDto = new PageDto(total, criteria);
+		
+		int realEndPage = (int) Math.ceil(total*1.0 / criteria.getAmount());
+		
+		ArrayList<BoardDto> bDtos = boardDao.listDao(criteria.getAmount(), criteria.getPageNum());
 		
 		model.addAttribute("bDtos", bDtos);
+		model.addAttribute("pageDto", pageDto);
+		model.addAttribute("currPage", criteria.getPageNum()); // 현재 출력하고 있는 페이지번호를 모델에 실어서 넘겨줌.
+		model.addAttribute("realEndPage", realEndPage);
 		
 		return "boardlist";
+	}
+	
+	@GetMapping(value = "/list2")
+	public String list2(Model model, Criteria criteria, HttpServletRequest request) {
+		
+		BoardDao boardDao = sqlSession.getMapper(BoardDao.class);
+		
+		String pageNum = request.getParameter("pageNum"); // 클라이언트가 클릭한 게시판 페이지 번호.
+		String searchKey = request.getParameter("searchKey");
+		
+		if (pageNum !=null) {//게시판메뉴를 클릭해서 게시판 목록이 보일 경우 pageNum값이 없으므로 에러발생			
+			criteria.setPageNum(Integer.parseInt(pageNum));
+		// 사용자가 클릭한 페이지 번호를 criteria 객체 내 변수인 pageNum값으로 셋팅. 초기값은 1인데 사용자가 다른 걸 클릭하면 바뀜.
+		} 
+		
+		int total = boardDao.searchResultTotalDao(searchKey); //게시판 내 모든 글의 총 개수
+		
+		PageDto pageDto = new PageDto(total, criteria);
+		
+		int realEndPage = (int) Math.ceil(total*1.0 / criteria.getAmount());
+		
+		//ArrayList<BoardDto> bDtos = boardDao.listDao(criteria.getAmount(), criteria.getPageNum());
+		ArrayList<BoardDto> bDtos = boardDao.searchKeyDao(criteria.getAmount(), criteria.getPageNum(), searchKey);
+		
+		model.addAttribute("bDtos", bDtos);
+		model.addAttribute("pageDto", pageDto);
+		model.addAttribute("currPage", criteria.getPageNum()); // 현재 출력하고 있는 페이지번호를 모델에 실어서 넘겨줌.
+		model.addAttribute("realEndPage", realEndPage);
+		model.addAttribute("searchKey", searchKey);
+		
+		return "boardlist2";
 	}
 	
 	@PostMapping(value = "/joinOk")
@@ -142,6 +191,7 @@ public class ProfileController {
 			//로그인 성공->세션에 현재 로그인 성공된 아이디를 저장			
 			session.setAttribute("sessionId", request.getParameter("mid"));	
 			memberDto = memberDao.getMemberInfoDao(request.getParameter("mid"));
+			session.setAttribute("sessionName", memberDto.getMname());  // 세션에 로그인한 회원이름이 표시됨.
 			
 			model.addAttribute("mname", memberDto.getMname());//로그인 회원 이름		
 			model.addAttribute("mdate", memberDto.getMdate());//로그인 회원 가입일

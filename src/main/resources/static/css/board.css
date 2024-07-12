@@ -39,3 +39,33 @@ a.contentlink:hover {
 	font-weight: bold;
 }
 
+a.pagelink:link {
+	font-family: NanumGothic, Arial;
+	font-size: 17px;
+	color: #253407;
+	text-decoration:none;
+}
+
+a.pagelink:visited {
+	font-family: NanumGothic, Arial;
+	font-size: 17px;
+	color: #253407;
+	text-decoration:none;
+}
+
+a.pagelink:hover {
+	font-family: NanumGothic, Arial;
+	font-size: 17px;
+	color: #253407;
+	font-weight: bold;
+}
+
+span.currpage {
+	font-family: NanumGothic, Arial;
+	font-size: 17px;
+	border:1px solid #253407;
+	background-color: #253407;
+	color: #ffffff;
+	font-weight: bold;
+	padding: 2px;
+}
